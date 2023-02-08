@@ -1,0 +1,21 @@
+FROM node:18-alpine3.15 as build-stage
+
+EXPOSE 3000
+
+WORKDIR /app
+
+COPY package.json ./
+
+RUN npm install && npm cache clean --force
+
+COPY . .
+
+RUN npm run build
+
+FROM nginx:1.23.3-alpine-slim
+
+WORKDIR /usr/shar/nginx/html
+
+COPY --from=build-stage /app /
+
+COPY ./nginx.conf  /etc/nginx/conf.d/default.conf
